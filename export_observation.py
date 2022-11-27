@@ -25,6 +25,8 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QTableWidgetItem, QTableWidget, QCheckBox
 
+from qgis.core import QgsProject
+
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
@@ -216,6 +218,11 @@ class ExportObservation:
 
 
         self.dlg.buttonLoad.clicked.connect(self.loadVocabulary)
+
+        layers_names = []
+        for layer in QgsProject.instance().mapLayers().values():
+            layers_names.append(layer.name())
+            self.dlg.comboLayer.addItem(layer.name())
 
         # show the dialog
         self.dlg.show()
