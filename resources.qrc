@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/export_observation" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
