@@ -23,9 +23,9 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QTableWidgetItem, QTableWidget, QCheckBox
+from qgis.PyQt.QtWidgets import QAction, QTableWidgetItem, QTableWidget, QCheckBox, QComboBox
 
-from qgis.core import QgsProject
+from qgis.core import QgsProject, Qgis
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -56,6 +56,13 @@ except:
 
 
 from rdflib import Namespace, Literal, URIRef,RDF, Graph
+
+
+namespaces = {
+    'cell': (Namespace("http://purl.org/ontology/dbcells/cells"), 'turtle'),
+    'geo' : (Namespace ("http://www.opengis.net/ont/geosparql"), 'xml'),
+    'amz' : (Namespace ("http://purl.org/ontology/dbcells/amazon"), "ttl")
+}
 
 class ExportObservation:
     """QGIS Plugin Implementation."""
@@ -93,6 +100,9 @@ class ExportObservation:
         self.first_start = None
 
         self.concepts = []
+        self.fields_name = []
+
+        self.load_vocabularies()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -190,7 +200,7 @@ class ExportObservation:
         icon_path = ':/plugins/export_observation/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'DBCells'),
+            text=self.tr(u'Export Observation'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -218,6 +228,8 @@ class ExportObservation:
 
 
         self.dlg.buttonLoad.clicked.connect(self.loadVocabulary)
+        self.dlg.button_load_layer.clicked.connect(self.load_fields)
+        self.fill_table(0)
 
         layers_names = []
         for layer in QgsProject.instance().mapLayers().values():
@@ -234,12 +246,26 @@ class ExportObservation:
             # substitute with your code.
             pass
 
-    def loadVocabulary(self):
-        #namespace = "http://purl.org/ontology/dbcells/cells#"
-        format = self.dlg.comboFormat.currentText()
-        namespace = self.dlg.lineURL.text()
-        prefix = self.dlg.linePrefix.text()
+    def load_fields(self):
+        layer = QgsProject.instance().mapLayersByName(self.dlg.comboLayer.currentText())[0]
+        fields = layer.fields()
+        for field in fields:
+            self.fields_name.append(field.name())
 
+        self.iface.messageBar().pushMessage(
+            "Success", "Load Layer fields",
+            level=Qgis.Success, duration=3
+        )
+    
+    def attributes_combo(self):
+        comboBox = QComboBox()
+        for attr in self.fields_name:
+            comboBox.addItem(attr)
+        return comboBox
+
+
+
+    def load_vocabulary(self, prefix, namespace, format):
         g = Graph()
         g.parse(namespace, format=format)
         q = """
@@ -260,13 +286,32 @@ class ExportObservation:
             attr = r["p"].split("#") 
             name = prefix+":"+attr[1]
             self.concepts.append(name)
-            #vs.append(key+":"+attr[1])
 
+
+    def loadVocabulary(self):
+        #namespace = "http://purl.org/ontology/dbcells/cells#"
+        format = self.dlg.comboFormat.currentText()
+        namespace = self.dlg.lineURL.text()
+        prefix = self.dlg.linePrefix.text()
+        start = len (self.concepts)
+        self.load_vocabulary(prefix, namespace, format)
+        self.fill_table(start)
+
+    def fill_table (self, start):
         self.dlg.tableAttributes.setRowCount(len(self.concepts))
-        self.dlg.tableAttributes.setColumnCount(1)
-        self.dlg.tableAttributes.setHorizontalHeaderLabels(["Concept"])
+        self.dlg.tableAttributes.setColumnCount(2)
+        self.dlg.tableAttributes.setHorizontalHeaderLabels(["Concept", "Attribute"])
+
+
+        for c in self.concepts[start:]:
+            self.dlg.tableAttributes.setCellWidget(start, 0, QCheckBox( c))
+            self.dlg.tableAttributes.setCellWidget(start, 1, self.attributes_combo())
+            start += 1
+
+    def load_vocabularies(self):
+        for key, value in namespaces.items():
+            self.load_vocabulary(key, str(value[0]), value[1])
+        
 
         
-        for c in self.concepts[i:]:
-            self.dlg.tableAttributes.setCellWidget(i, 0, QCheckBox( c))
-            i += 1
+
