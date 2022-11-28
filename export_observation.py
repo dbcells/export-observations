@@ -37,6 +37,10 @@ import uuid
 
 from functools import partial
 
+import re
+
+
+
 plugin_dir = os.path.dirname(__file__)
 
 try:
@@ -78,6 +82,20 @@ GEO = namespaces['geo'][0]
 
 QB = Namespace ("http://purl.org/linked-data/cube/")
 
+def validade_url(s):
+    if (type(s) != str ):
+        return False
+
+    regex = re.compile(
+        r'^(?:http|ftp)s?://' # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
+        r'localhost|' #localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+        r'(?::\d+)?' # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+
+    return (re.match(regex, s) is not None) 
+
 class Observation ():
     
 
@@ -86,11 +104,15 @@ class Observation ():
     @BNamespace('qb', QB)
     @BNamespace('amz', AMZ)
     def __init__(self, dict):
-        self.id = dict["id"]
-        dict.pop("id")
+        self.id = dict["obs_id"] # problema com os ids
+        dict.pop("obs_id")
 
         for key in dict:
-            setattr(self, key, Literal(dict[key]))
+            #print (dict[key], key)
+            if (validade_url(dict[key])): # talvez deveria ver pelo schema
+                setattr(self, key, URIRef(dict[key]))    
+            else:
+                setattr(self, key, Literal(dict[key]))
 
 
 class ExportObservation:
@@ -361,14 +383,7 @@ class ExportObservation:
     def cell_activate (self, row, column):
         print (row, column)
 
-    def item_clicked (self,item):
-        print ("oi")
-        print (item)
-        print (self.dlg.tableAttributes.currentItem())
-        self.iface.messageBar().pushMessage(
-            "Success", "Load Layer fields",
-            level=Qgis.Success, duration=3
-        )
+ 
 
     def combo_changed(self,row, s):
         if (s == "Layer Attribute"):
@@ -394,13 +409,13 @@ class ExportObservation:
                 combo = self.dlg.tableAttributes.cellWidget(row, 2)
                 attribute = combo.currentText()
       
-                print (attribute, rdf)
+                #print (attribute, rdf)
                 namespace = namespaces[rdf[0]][0]
                 rdf_attr = rdf[1]
                 saveAttrs[attribute] = rdf_attr
 
                 setattr(Observation,attribute, namespace[rdf_attr])
-                print(Observation,attribute, rdf[0],  namespace, rdf_attr)
+                #print(Observation,attribute, rdf[0],  namespace, rdf_attr)
                 
 
         # verificar se existe um self.layer
@@ -411,10 +426,11 @@ class ExportObservation:
             features = self.layer.getFeatures()
 
         observations = []
+        #print (saveAttrs)
         for feature in features:
 
             obs = {
-                "id": str(uuid.uuid4())
+                "obs_id": str(uuid.uuid4())
             }
 
 
