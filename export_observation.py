@@ -33,6 +33,8 @@ from .resources import *
 from .export_observation_dialog import ExportObservationDialog
 import os.path
 
+import uuid 
+
 from functools import partial
 
 plugin_dir = os.path.dirname(__file__)
@@ -58,12 +60,37 @@ except:
 
 from rdflib import Namespace, Literal, URIRef,RDF, Graph
 
+from rdflib.namespace import DC, FOAF
+
+from simpot import serialize_to_rdf, serialize_to_rdf_file, RdfsClass, BNamespace, graph
+
 
 namespaces = {
     'cell': (Namespace("http://purl.org/ontology/dbcells/cells"), 'turtle'),
-  #  'geo' : (Namespace ("http://www.opengis.net/ont/geosparql"), 'xml'),
+    'geo' : (Namespace ("http://www.opengis.net/ont/geosparql"), 'xml'),
     'amz' : (Namespace ("http://purl.org/ontology/dbcells/amazon"), "ttl")
 }
+
+
+AMZ =  namespaces['amz'][0]
+CELL = namespaces['cell'][0]
+GEO = namespaces['geo'][0]
+
+QB = Namespace ("http://purl.org/linked-data/cube/")
+
+class Observation ():
+    
+
+    
+    @RdfsClass(QB.Observation,"http://www.dbcells.org/amazon/observations/")
+    @BNamespace('qb', QB)
+    @BNamespace('amz', AMZ)
+    def __init__(self, dict):
+        self.id = dict["id"]
+        dict.pop("id")
+
+        for key in dict:
+            setattr(self, key, Literal(dict[key]))
 
 
 class ExportObservation:
@@ -231,6 +258,7 @@ class ExportObservation:
 
         self.dlg.buttonLoad.clicked.connect(self.load_fill)
         self.dlg.buttonTTL.clicked.connect(self.output_file)
+        self.dlg.buttonBox.accepted.connect(self.saveFile)
 
         self.dlg.button_load_layer.clicked.connect(self.load_fields)
         self.fill_table(0)
@@ -253,10 +281,10 @@ class ExportObservation:
             pass
 
     def load_fields(self):
-        layer = QgsProject.instance().mapLayersByName(self.dlg.comboLayer.currentText())[0]
+        self.layer = QgsProject.instance().mapLayersByName(self.dlg.comboLayer.currentText())[0]
         self.fields_name = []
 
-        fields = layer.fields()
+        fields = self.layer.fields()
         for field in fields:
             self.fields_name.append(field.name())
 
@@ -352,5 +380,57 @@ class ExportObservation:
     def output_file (self):
         self.file_name=str(QFileDialog.getSaveFileName(caption="Defining output file", filter="Terse RDF Triple Language(*.ttl)")[0])
         self.dlg.lineTTL.setText(self.file_name)
+
+
+    def saveFile(self):
+
+        saveAttrs = {}
+        for row in range(self.dlg.tableAttributes.rowCount()): 
+            check = self.dlg.tableAttributes.cellWidget(row, 0) 
+            if check.isChecked():
+                rdf_attr = check.text()
+                rdf = rdf_attr.split(":")
+
+                combo = self.dlg.tableAttributes.cellWidget(row, 2)
+                attribute = combo.currentText()
+      
+                print (attribute, rdf)
+                namespace = namespaces[rdf[0]][0]
+                rdf_attr = rdf[1]
+                saveAttrs[attribute] = rdf_attr
+
+                setattr(Observation,attribute, namespace[rdf_attr])
+                print(Observation,attribute, rdf[0],  namespace, rdf_attr)
+                
+
+        # verificar se existe um self.layer
+
+        if self.dlg.checkSelected.isChecked():
+            features = self.layer.selectedFeatures() 
+        else:
+            features = self.layer.getFeatures()
+
+        observations = []
+        for feature in features:
+
+            obs = {
+                "id": str(uuid.uuid4())
+            }
+
+
+            for key in saveAttrs:
+                obs[key] = feature[key]
+            
+     
+            observations.append (obs)
+        
+        fileName = self.dlg.lineTTL.text()
+        self.iface.messageBar().pushMessage(
+            "Success", "Output file written at " + fileName,
+            level=Qgis.Success, duration=3
+        )
+
+        serialize_to_rdf_file(observations, Observation, fileName)
+        
         
 
