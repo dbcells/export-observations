@@ -23,7 +23,7 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QTableWidgetItem, QTableWidget, QCheckBox, QComboBox, QLineEdit
+from qgis.PyQt.QtWidgets import QAction, QTableWidgetItem, QTableWidget, QCheckBox, QComboBox, QLineEdit, QFileDialog
 
 from qgis.core import QgsProject, Qgis
 
@@ -230,6 +230,8 @@ class ExportObservation:
 
 
         self.dlg.buttonLoad.clicked.connect(self.load_fill)
+        self.dlg.buttonTTL.clicked.connect(self.output_file)
+
         self.dlg.button_load_layer.clicked.connect(self.load_fields)
         self.fill_table(0)
 
@@ -310,7 +312,7 @@ class ExportObservation:
     def fill_table (self, start):
         self.dlg.tableAttributes.setRowCount(len(self.concepts))
         self.dlg.tableAttributes.setColumnCount(3)
-        self.dlg.tableAttributes.setHorizontalHeaderLabels(["Concept", "Value", "Attribute"])
+        self.dlg.tableAttributes.setHorizontalHeaderLabels(["Concept", "Type", "Value"])
 
 
         for c in self.concepts[start:]:
@@ -347,6 +349,8 @@ class ExportObservation:
             self.dlg.tableAttributes.setCellWidget(row, 2, QLineEdit())
 
         
-
+    def output_file (self):
+        self.file_name=str(QFileDialog.getSaveFileName(caption="Defining output file", filter="Terse RDF Triple Language(*.ttl)")[0])
+        self.dlg.lineTTL.setText(self.file_name)
         
 
