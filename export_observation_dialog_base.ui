@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>708</width>
+    <width>622</width>
     <height>324</height>
    </rect>
   </property>
@@ -52,17 +52,14 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+        <widget class="QCheckBox" name="checkSelected">
+         <property name="text">
+          <string>Selected features</string>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
+         <property name="checked">
+          <bool>true</bool>
          </property>
-        </spacer>
+        </widget>
        </item>
       </layout>
      </item>
@@ -175,19 +172,19 @@
          <item>
           <widget class="QLabel" name="labelID">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="minimumSize">
             <size>
-             <width>108</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>
            <property name="text">
-            <string>ID</string>
+            <string>Observation ID</string>
            </property>
           </widget>
          </item>
@@ -201,9 +198,39 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>300</width>
+             <width>16777215</width>
              <height>16777215</height>
             </size>
+           </property>
+           <item>
+            <property name="text">
+             <string>Universally Unique Identifier - UUID</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Layer Attribute</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Attribute</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox">
+           <property name="enabled">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -224,16 +251,6 @@
           </spacer>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="checkSelected">
-         <property name="text">
-          <string>Selected</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="QLabel" name="atributos">
@@ -265,7 +282,7 @@
        <item>
         <widget class="QDialogButtonBox" name="buttonBox">
          <property name="standardButtons">
-          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
          </property>
         </widget>
        </item>

@@ -23,7 +23,7 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QTableWidgetItem, QTableWidget, QCheckBox, QComboBox
+from qgis.PyQt.QtWidgets import QAction, QTableWidgetItem, QTableWidget, QCheckBox, QComboBox, QLineEdit
 
 from qgis.core import QgsProject, Qgis
 
@@ -33,6 +33,7 @@ from .resources import *
 from .export_observation_dialog import ExportObservationDialog
 import os.path
 
+from functools import partial
 
 plugin_dir = os.path.dirname(__file__)
 
@@ -60,9 +61,10 @@ from rdflib import Namespace, Literal, URIRef,RDF, Graph
 
 namespaces = {
     'cell': (Namespace("http://purl.org/ontology/dbcells/cells"), 'turtle'),
-    'geo' : (Namespace ("http://www.opengis.net/ont/geosparql"), 'xml'),
+  #  'geo' : (Namespace ("http://www.opengis.net/ont/geosparql"), 'xml'),
     'amz' : (Namespace ("http://purl.org/ontology/dbcells/amazon"), "ttl")
 }
+
 
 class ExportObservation:
     """QGIS Plugin Implementation."""
@@ -227,9 +229,11 @@ class ExportObservation:
             self.dlg = ExportObservationDialog()
 
 
-        self.dlg.buttonLoad.clicked.connect(self.loadVocabulary)
+        self.dlg.buttonLoad.clicked.connect(self.load_fill)
         self.dlg.button_load_layer.clicked.connect(self.load_fields)
         self.fill_table(0)
+
+        self.dlg.tableAttributes.cellActivated.connect(self.cell_activate)
 
         layers_names = []
         for layer in QgsProject.instance().mapLayers().values():
@@ -248,9 +252,13 @@ class ExportObservation:
 
     def load_fields(self):
         layer = QgsProject.instance().mapLayersByName(self.dlg.comboLayer.currentText())[0]
+        self.fields_name = []
+
         fields = layer.fields()
         for field in fields:
             self.fields_name.append(field.name())
+
+        self.fill_table(0)
 
         self.iface.messageBar().pushMessage(
             "Success", "Load Layer fields",
@@ -273,8 +281,10 @@ class ExportObservation:
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
             SELECT ?p
-            WHERE {
-                ?p rdf:type owl:DatatypeProperty.
+            WHERE 
+            {
+               { ?p rdf:type owl:DatatypeProperty} UNION
+               { ?p rdf:type owl:ObjectProperty}
             }
         """
 
@@ -288,7 +298,7 @@ class ExportObservation:
             self.concepts.append(name)
 
 
-    def loadVocabulary(self):
+    def load_fill(self):
         #namespace = "http://purl.org/ontology/dbcells/cells#"
         format = self.dlg.comboFormat.currentText()
         namespace = self.dlg.lineURL.text()
@@ -299,18 +309,43 @@ class ExportObservation:
 
     def fill_table (self, start):
         self.dlg.tableAttributes.setRowCount(len(self.concepts))
-        self.dlg.tableAttributes.setColumnCount(2)
-        self.dlg.tableAttributes.setHorizontalHeaderLabels(["Concept", "Attribute"])
+        self.dlg.tableAttributes.setColumnCount(3)
+        self.dlg.tableAttributes.setHorizontalHeaderLabels(["Concept", "Value", "Attribute"])
 
 
         for c in self.concepts[start:]:
             self.dlg.tableAttributes.setCellWidget(start, 0, QCheckBox( c))
-            self.dlg.tableAttributes.setCellWidget(start, 1, self.attributes_combo())
+            comboBox = QComboBox()
+            comboBox.textActivated.connect(partial(self.combo_changed, start))
+            comboBox.addItem("Constant Value")
+            comboBox.addItem("Layer Attribute")
+            self.dlg.tableAttributes.setCellWidget(start, 1, comboBox)
+            self.dlg.tableAttributes.setCellWidget(start, 2, QLineEdit())
+            #self.dlg.tableAttributes.setCellWidget(start, 1, self.attributes_combo())
             start += 1
 
     def load_vocabularies(self):
         for key, value in namespaces.items():
             self.load_vocabulary(key, str(value[0]), value[1])
+
+    def cell_activate (self, row, column):
+        print (row, column)
+
+    def item_clicked (self,item):
+        print ("oi")
+        print (item)
+        print (self.dlg.tableAttributes.currentItem())
+        self.iface.messageBar().pushMessage(
+            "Success", "Load Layer fields",
+            level=Qgis.Success, duration=3
+        )
+
+    def combo_changed(self,row, s):
+        if (s == "Layer Attribute"):
+            self.dlg.tableAttributes.setCellWidget(row, 2, self.attributes_combo())
+        else:
+            self.dlg.tableAttributes.setCellWidget(row, 2, QLineEdit())
+
         
 
         
