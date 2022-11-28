@@ -96,6 +96,21 @@ def validade_url(s):
 
     return (re.match(regex, s) is not None) 
 
+
+def parse_ifs(value):
+  if value is None:
+      return ""
+  try:
+      n = int(value)
+      return n
+  except:
+      try: 
+        n = float (value)
+        return n
+      except:
+        return value
+
+
 class Observation ():
     
 
@@ -400,21 +415,27 @@ class ExportObservation:
     def saveFile(self):
 
         saveAttrs = {}
+        save_constants = {}
         for row in range(self.dlg.tableAttributes.rowCount()): 
             check = self.dlg.tableAttributes.cellWidget(row, 0) 
             if check.isChecked():
                 rdf_attr = check.text()
                 rdf = rdf_attr.split(":")
-
-                combo = self.dlg.tableAttributes.cellWidget(row, 2)
-                attribute = combo.currentText()
-      
-                #print (attribute, rdf)
-                namespace = namespaces[rdf[0]][0]
                 rdf_attr = rdf[1]
-                saveAttrs[attribute] = rdf_attr
+                namespace = namespaces[rdf[0]][0]
 
-                setattr(Observation,attribute, namespace[rdf_attr])
+                combo_type = self.dlg.tableAttributes.cellWidget(row, 1)
+
+                if (combo_type.currentText() == "Layer Attribute"):
+                    combo = self.dlg.tableAttributes.cellWidget(row, 2)
+                    attribute = combo.currentText()
+                    saveAttrs[attribute] = rdf_attr
+                    setattr(Observation,attribute, namespace[rdf_attr])
+                else:
+                    line_edit = self.dlg.tableAttributes.cellWidget(row, 2)
+                    save_constants[rdf_attr] = parse_ifs(line_edit.text())
+                    setattr(Observation,rdf_attr, namespace[rdf_attr])
+
                 #print(Observation,attribute, rdf[0],  namespace, rdf_attr)
                 
 
@@ -437,6 +458,8 @@ class ExportObservation:
             for key in saveAttrs:
                 obs[key] = feature[key]
             
+            for key in save_constants:
+                obs[key] = save_constants[key]
      
             observations.append (obs)
         
