@@ -282,7 +282,7 @@ class ExportObservation:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginVectorMenu(
-                self.tr(u'&Export Observation'),
+                self.tr(u'&DBCells'),
                 action)
             self.iface.removeToolBarIcon(action)
 
