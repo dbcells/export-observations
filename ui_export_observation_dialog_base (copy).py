@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/sergio/.local/share/QGIS/QGIS3/profiles/default/python/plugins/export_observation/export_observation_dialog_base.ui'
+# Form implementation generated from reading ui file '/home/sergio/.local/share/QGIS/QGIS3/profiles/default/python/plugins/export_observation/export_observation_dialog_base (copy).ui'
 #
 # Created by: PyQt5 UI code generator 5.15.6
 #
@@ -114,7 +114,7 @@ class Ui_ExportObservationDialogBase(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.labelID = QtWidgets.QLabel(ExportObservationDialogBase)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.labelID.sizePolicy().hasHeightForWidth())
@@ -134,7 +134,7 @@ class Ui_ExportObservationDialogBase(object):
         self.comboID.addItem("")
         self.horizontalLayout_2.addWidget(self.comboID)
         self.label_4 = QtWidgets.QLabel(ExportObservationDialogBase)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_4.sizePolicy().hasHeightForWidth())
@@ -155,20 +155,24 @@ class Ui_ExportObservationDialogBase(object):
         self.label_5.setObjectName("label_5")
         self.horizontalLayout_4.addWidget(self.label_5)
         self.lineTTL = QtWidgets.QLineEdit(ExportObservationDialogBase)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lineTTL.sizePolicy().hasHeightForWidth())
+        self.lineTTL.setSizePolicy(sizePolicy)
         self.lineTTL.setObjectName("lineTTL")
         self.horizontalLayout_4.addWidget(self.lineTTL)
         self.buttonTTL = QtWidgets.QPushButton(ExportObservationDialogBase)
         self.buttonTTL.setObjectName("buttonTTL")
         self.horizontalLayout_4.addWidget(self.buttonTTL)
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setContentsMargins(-1, 10, -1, -1)
+        self.verticalLayout.setObjectName("verticalLayout")
         self.atributos = QtWidgets.QLabel(ExportObservationDialogBase)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.atributos.sizePolicy().hasHeightForWidth())
-        self.atributos.setSizePolicy(sizePolicy)
         self.atributos.setObjectName("atributos")
-        self.verticalLayout_2.addWidget(self.atributos)
+        self.verticalLayout.addWidget(self.atributos)
+        self.verticalLayout_2.addLayout(self.verticalLayout)
         self.tableAttributes = QtWidgets.QTableWidget(ExportObservationDialogBase)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)

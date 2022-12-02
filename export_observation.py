@@ -70,15 +70,17 @@ from simpot import serialize_to_rdf, serialize_to_rdf_file, RdfsClass, BNamespac
 
 
 namespaces = {
-    'cell': (Namespace("http://purl.org/ontology/dbcells/cells"), 'turtle'),
-    'geo' : (Namespace ("http://www.opengis.net/ont/geosparql"), 'xml'),
+    'cell': (Namespace("http://purl.org/ontology/dbcells/cells"), 'ttl'),
+    #'geo' : (Namespace ("http://www.opengis.net/ont/geosparql"), 'xml'),
+    'sdmx' : (Namespace ("http://purl.org/linked-data/sdmx/2009/dimension"), 'ttl'),
     'amz' : (Namespace ("http://purl.org/ontology/dbcells/amazon"), "ttl")
 }
 
 
 AMZ =  namespaces['amz'][0]
 CELL = namespaces['cell'][0]
-GEO = namespaces['geo'][0]
+SDMX = namespaces['sdmx'][0]
+#GEO = namespaces['geo'][0]
 
 QB = Namespace ("http://purl.org/linked-data/cube/")
 
@@ -118,6 +120,8 @@ class Observation ():
     @RdfsClass(QB.Observation,"http://www.dbcells.org/amazon/observations/")
     @BNamespace('qb', QB)
     @BNamespace('amz', AMZ)
+    @BNamespace('sdmx', SDMX)
+    @BNamespace('cell', CELL)
     def __init__(self, dict):
         self.id = dict["obs_id"] # problema com os ids
         dict.pop("obs_id")
@@ -351,7 +355,8 @@ class ExportObservation:
             WHERE 
             {
                { ?p rdf:type owl:DatatypeProperty} UNION
-               { ?p rdf:type owl:ObjectProperty}
+               { ?p rdf:type owl:ObjectProperty} UNION
+               { ?p rdf:type rdf:Property}    
             }
         """
 
