@@ -163,7 +163,7 @@ class ExportObservation:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&Export Observation')
+        self.menu = self.tr(u'&DBCells')
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -270,7 +270,7 @@ class ExportObservation:
         icon_path = ':/plugins/export_observation/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Export Observation'),
+            text=self.tr(u'&Export Observation'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
