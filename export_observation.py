@@ -70,10 +70,10 @@ from simpot import serialize_to_rdf, serialize_to_rdf_file, RdfsClass, BNamespac
 
 
 namespaces = {
-    'cell': (Namespace("http://purl.org/ontology/dbcells/cells"), 'ttl'),
+    'cell': (Namespace("http://purl.org/ontology/dbcells/cells#"), 'ttl'),
     #'geo' : (Namespace ("http://www.opengis.net/ont/geosparql"), 'xml'),
-    'sdmx' : (Namespace ("http://purl.org/linked-data/sdmx/2009/dimension"), 'ttl'),
-    'amz' : (Namespace ("http://purl.org/ontology/dbcells/amazon"), "ttl")
+    'sdmx' : (Namespace ("http://purl.org/linked-data/sdmx/2009/dimension#"), 'ttl'),
+    'amz' : (Namespace ("http://purl.org/ontology/dbcells/amazon#"), "ttl")
 }
 
 
