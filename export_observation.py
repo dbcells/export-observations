@@ -25,7 +25,7 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QTableWidgetItem, QTableWidget, QCheckBox, QComboBox, QLineEdit, QFileDialog
 
-from qgis.core import QgsProject, Qgis
+from qgis.core import QgsProject, Qgis, QgsVectorLayer, QgsRasterLayer
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -125,6 +125,9 @@ class Observation ():
     def __init__(self, dict):
         self.id = dict["obs_id"] # problema com os ids
         dict.pop("obs_id")
+
+        # caso a tabela tem um id, ele vai substituir aqui, entao por hora vou remover esse id
+        #dict.pop("id")
 
         for key in dict:
             #print (dict[key], key)
@@ -286,6 +289,15 @@ class ExportObservation:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    def update_comboLayer(self):
+
+        self.dlg.comboLayer.clear()
+
+        for layer in QgsProject.instance().mapLayers().values():
+            if type(layer) == QgsVectorLayer:
+                self.dlg.comboLayer.addItem(layer.name())
+                
+
 
     def run(self):
         """Run method that performs all the real work"""
@@ -296,20 +308,17 @@ class ExportObservation:
             self.first_start = False
             self.dlg = ExportObservationDialog()
 
+            self.dlg.buttonLoad.clicked.connect(self.load_fill)
+            self.dlg.buttonTTL.clicked.connect(self.output_file)
+            self.dlg.buttonBox.accepted.connect(self.saveFile)
 
-        self.dlg.buttonLoad.clicked.connect(self.load_fill)
-        self.dlg.buttonTTL.clicked.connect(self.output_file)
-        self.dlg.buttonBox.accepted.connect(self.saveFile)
+            self.dlg.button_load_layer.clicked.connect(self.load_fields)
+            self.fill_table(0)
 
-        self.dlg.button_load_layer.clicked.connect(self.load_fields)
-        self.fill_table(0)
-
-        self.dlg.tableAttributes.cellActivated.connect(self.cell_activate)
-
-        layers_names = []
-        for layer in QgsProject.instance().mapLayers().values():
-            layers_names.append(layer.name())
-            self.dlg.comboLayer.addItem(layer.name())
+            self.dlg.tableAttributes.cellActivated.connect(self.cell_activate)
+        
+        self.update_comboLayer()
+    
 
         # show the dialog
         self.dlg.show()
